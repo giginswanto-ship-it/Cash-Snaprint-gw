@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekapitulasi Kas & Keuangan - SNAPRINT GWISATA</title>
+  <link rel="icon" href="logo.jpg" type="image/jpeg">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- SheetJS (XLSX Export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              dark: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col antialiased">
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-lg border-b border-slate-800 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Brand Logo & Business Info -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('daily')">
+          <img src="logo.jpg" alt="Logo SNAPRINT" class="w-12 h-12 rounded-xl object-cover shadow-lg border border-slate-700 bg-slate-800">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xl font-black tracking-tight text-white" id="navShopName">SNAPRINT</span>
+              <span class="px-2 py-0.5 text-[11px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full" id="navShopBadge">GWISATA</span>
+            </div>
+            <p class="text-[11px] text-slate-400" id="navShopSub">Sistem Rekapitulasi & Monitor Kas Tunai</p>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons (Desktop) -->
+        <div class="hidden lg:flex items-center space-x-2">
+          <button onclick="openModal('income')" class="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow-md shadow-emerald-900/30">
+            <i class="fa-solid fa-circle-plus text-sm"></i>
+            <span>+ Pemasukan</span>
+          </button>
+          <button onclick="openModal('expense')" class="flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow-md shadow-rose-900/30">
+            <i class="fa-solid fa-circle-minus text-sm"></i>
+            <span>- Pengeluaran</span>
+          </button>
+          <button onclick="openModal('draw')" class="flex items-center space-x-2 bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow-md shadow-amber-900/30" title="Terkunci dengan PIN Owner">
+            <i class="fa-solid fa-lock text-xs text-amber-200"></i>
+            <i class="fa-solid fa-hand-holding-dollar text-sm"></i>
+            <span>Tarik Owner</span>
+          </button>
+          <button onclick="switchTab('reconciliation')" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-bold transition">
+            <i class="fa-solid fa-calculator text-emerald-400 text-sm"></i>
+            <span>Hitung Kas Laci</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Quick Action Row -->
+    <div class="lg:hidden px-4 pb-3 flex items-center justify-between space-x-2 border-t border-slate-800/80 pt-2">
+      <button onclick="openModal('income')" class="flex-1 flex items-center justify-center space-x-1.5 bg-emerald-600 text-white py-2 rounded-xl text-xs font-bold shadow-sm">
+        <i class="fa-solid fa-plus text-xs"></i>
+        <span>Pemasukan</span>
+      </button>
+      <button onclick="openModal('expense')" class="flex-1 flex items-center justify-center space-x-1.5 bg-rose-600 text-white py-2 rounded-xl text-xs font-bold shadow-sm">
+        <i class="fa-solid fa-minus text-xs"></i>
+        <span>Pengeluaran</span>
+      </button>
+      <button onclick="openModal('draw')" class="flex-1 flex items-center justify-center space-x-1 bg-amber-600 text-white py-2 rounded-xl text-xs font-bold shadow-sm">
+        <i class="fa-solid fa-lock text-[10px] text-amber-200"></i>
+        <span>Tarik</span>
+      </button>
+      <button onclick="switchTab('reconciliation')" class="flex items-center justify-center bg-slate-800 text-emerald-400 p-2 rounded-xl text-xs border border-slate-700" title="Kalkulator Fisik Laci">
+        <i class="fa-solid fa-calculator text-sm"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
+
+    <!-- ================= DYNAMIC PERIOD & CONTROLS BANNER ================= -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      
+      <!-- Left: Active Date & Status -->
+      <div>
+        <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" id="displayPeriodTitle">Rekapitulasi Harian</h1>
+          <span id="displayPeriodBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Hari Ini</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-0.5" id="displayPeriodSubtitle">Pencatatan transaksi & mutasi arus kas toko</p>
+      </div>
+
+      <!-- Right: Flexible Date Picker & Mode Switcher -->
+      <div class="flex flex-wrap items-center gap-2">
+        
+        <!-- Period Mode Switcher -->
+        <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200">
+          <button onclick="setPeriodMode('day')" id="periodModeBtn-day" class="px-3 py-1.5 rounded-lg bg-white font-bold text-slate-900 shadow-sm transition">
+            Harian
+          </button>
+          <button onclick="setPeriodMode('range')" id="periodModeBtn-range" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition">
+            Rentang Tanggal
+          </button>
+        </div>
+
+        <!-- Day Navigator Controls (When mode === 'day') -->
+        <div id="dayNavControls" class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button id="btnPrevDate" title="Hari Sebelumnya" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <div class="flex items-center space-x-1 px-2">
+            <i class="fa-regular fa-calendar-days text-emerald-600 text-xs"></i>
+            <input type="date" id="recapDateInput" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
+          </div>
+          <button id="btnNextDate" title="Hari Berikutnya" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+          <button id="btnToday" class="px-2.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition shadow-sm">
+            Hari Ini
+          </button>
+        </div>
+
+        <!-- Range Controls (When mode === 'range') -->
+        <div id="rangeNavControls" class="hidden flex items-center space-x-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200 text-xs">
+          <input type="date" id="rangeStartDateInput" class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+          <span class="text-slate-400 font-bold">s/d</span>
+          <input type="date" id="rangeEndDateInput" class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-800">
+          <button id="btnApplyRange" class="px-2.5 py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition">
+            Terapkan
+          </button>
+        </div>
+
+        <!-- Print & Export Buttons -->
+        <div class="flex items-center space-x-1.5">
+          <button onclick="openPrintModal()" class="flex items-center space-x-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+            <i class="fa-solid fa-print text-slate-300"></i>
+            <span>Cetak</span>
+          </button>
+          <button onclick="exportToExcel()" class="flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-sm">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <span>Excel</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= METRIC SUMMARY CARDS ================= -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      <!-- Card 1: Total Pemasukan -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm card-hover-effect relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute -right-3 -top-3 w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center opacity-60">
+          <i class="fa-solid fa-arrow-down-left text-3xl text-emerald-500"></i>
+        </div>
+        <div class="relative z-10">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Pemasukan (Omset)</span>
+          <div class="text-2xl font-black text-slate-900 font-mono-numeric mt-1" id="statTotalIncome">Rp 0</div>
+          
+          <!-- Dynamic Methods Breakdown -->
+          <div class="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs" id="statIncomeBreakdownContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Total Pengeluaran -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm card-hover-effect relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute -right-3 -top-3 w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center opacity-60">
+          <i class="fa-solid fa-arrow-up-right text-3xl text-rose-500"></i>
+        </div>
+        <div class="relative z-10">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Pengeluaran</span>
+          <div class="text-2xl font-black text-rose-600 font-mono-numeric mt-1" id="statTotalExpense">Rp 0</div>
+          
+          <div class="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs" id="statExpenseBreakdownContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Penarikan Owner -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm card-hover-effect relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute -right-3 -top-3 w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center opacity-60">
+          <i class="fa-solid fa-hand-holding-dollar text-3xl text-amber-500"></i>
+        </div>
+        <div class="relative z-10">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Penarikan Tunai Owner</span>
+          <div class="text-2xl font-black text-amber-600 font-mono-numeric mt-1" id="statTotalDraw">Rp 0</div>
+          
+          <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Frekuensi Tarik:</span>
+            <span class="font-bold text-slate-800 font-mono-numeric" id="statDrawCount">0 kali</span>
+          </div>
+          <div class="mt-1 text-[11px] text-amber-700 font-medium truncate">
+            Pengambilan fisik kas toko
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: SALDO AKHIR KAS TUNAI FISIK LACI (Continuous Ledger) -->
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg border border-slate-700 card-hover-effect relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full"></div>
+        <div class="relative z-10">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">SALDO AKHIR KAS TUNAI</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">Laci Kasir</span>
+          </div>
+          
+          <div class="text-2xl font-black text-white font-mono-numeric mt-1" id="statClosingCash">Rp 0</div>
+          
+          <div class="mt-3 pt-3 border-t border-slate-700/80 space-y-1 text-[11px] text-slate-300">
+            <div class="flex justify-between">
+              <span>Saldo Awal (Pagi):</span>
+              <span class="font-mono-numeric text-slate-200" id="statOpeningCash">Rp 0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>+ Kas Masuk Tunai:</span>
+              <span class="font-mono-numeric text-emerald-400" id="statCalcCashIn">+Rp 0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>- Kas Keluar (Biaya + Tarik):</span>
+              <span class="font-mono-numeric text-rose-300" id="statCalcCashOutTotal">-Rp 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= NAVIGATION TABS ================= -->
+    <div class="flex border-b border-slate-200 mb-6 space-x-1 sm:space-x-2 overflow-x-auto pb-1">
+      
+      <!-- Tab 1: Transaksi -->
+      <button onclick="switchTab('daily')" id="tabBtn-daily" class="tab-btn active px-3.5 py-3 text-xs sm:text-sm font-bold text-emerald-600 border-b-2 border-emerald-600 flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Daftar Transaksi</span>
+        <span id="dailyTotalBadge" class="ml-1 px-2 py-0.5 text-[11px] bg-slate-200 text-slate-700 font-bold rounded-full">0</span>
+      </button>
+
+      <!-- Tab 2: Monitor Kas Tunai Harian -->
+      <button onclick="switchTab('cashflow')" id="tabBtn-cashflow" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-vault text-amber-500"></i>
+        <span>Monitor Kas Tunai Harian</span>
+        <span class="px-1.5 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 font-bold rounded">Buku Kas</span>
+      </button>
+
+      <!-- Tab 3: Rekonsiliasi & Hitung Kas Laci -->
+      <button onclick="switchTab('reconciliation')" id="tabBtn-reconciliation" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-calculator text-indigo-500"></i>
+        <span>Hitung Kas Fisik Laci</span>
+      </button>
+
+      <!-- Tab 4: Statistik & Rincian -->
+      <button onclick="switchTab('breakdown')" id="tabBtn-breakdown" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-chart-pie text-cyan-500"></i>
+        <span>Statistik & Analisis</span>
+      </button>
+
+      <!-- Tab 5: Rekap Bulanan -->
+      <button onclick="switchTab('history')" id="tabBtn-history" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-calendar-week text-purple-500"></i>
+        <span>Rekap Bulanan</span>
+      </button>
+
+      <!-- Tab 6: Pengaturan & Master Data Dinamis -->
+      <button onclick="switchTab('settings')" id="tabBtn-settings" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-sliders text-slate-500"></i>
+        <span>Pengaturan & Master Data</span>
+      </button>
+
+      <!-- Tab 7: Backup & Restore -->
+      <button onclick="switchTab('backup')" id="tabBtn-backup" class="tab-btn px-3.5 py-3 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center space-x-2 whitespace-nowrap">
+        <i class="fa-solid fa-database text-blue-500"></i>
+        <span>Backup & Data</span>
+      </button>
+
+    </div>
+
+    <!-- ================= TAB CONTENT 1: DAFTAR TRANSAKSI ================= -->
+    <div id="tabContent-daily" class="tab-content space-y-5">
+      
+      <!-- Filter & Search Toolbar -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        
+        <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap gap-y-2">
+          <span class="text-xs font-bold text-slate-400 uppercase">Tipe:</span>
+          <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+            <button onclick="setFilterType('all')" id="filterBtn-all" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-slate-800 font-bold">Semua</button>
+            <button onclick="setFilterType('income')" id="filterBtn-income" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800">Pemasukan</button>
+            <button onclick="setFilterType('expense')" id="filterBtn-expense" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800">Pengeluaran</button>
+            <button onclick="setFilterType('draw')" id="filterBtn-draw" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800">Tarik Owner</button>
+          </div>
+
+          <!-- Dynamic Category/Method Filter Dropdown -->
+          <select id="filterCategorySelect" onchange="handleCategoryFilterChange(this.value)" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="all">Semua Kategori / Metode</option>
+          </select>
+        </div>
+
+        <!-- Search Box -->
+        <div class="w-full md:w-72 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+          <input type="text" id="tableSearchInput" placeholder="Cari keterangan / nominal..." class="w-full pl-8 pr-4 py-2 bg-slate-50 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+        </div>
+
+      </div>
+
+      <!-- Transactions Table Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3.5 w-28">Tanggal & Jam</th>
+                <th class="px-4 py-3.5 w-28">Tipe</th>
+                <th class="px-4 py-3.5">Kategori / Metode</th>
+                <th class="px-4 py-3.5">Keterangan / Rincian</th>
+                <th class="px-4 py-3.5 text-right">Nominal</th>
+                <th class="px-4 py-3.5 text-center w-24">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden py-12 text-center">
+          <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+            <i class="fa-regular fa-folder-open text-2xl"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800">Belum Ada Data Transaksi</h3>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">Belum ada transaksi pada periode yang dipilih. Klik tombol di bawah untuk mencatat.</p>
+          <div class="mt-4 flex justify-center space-x-2">
+            <button onclick="openModal('income')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm">
+              + Pemasukan
+            </button>
+            <button onclick="openModal('expense')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm">
+              + Pengeluaran
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= TAB CONTENT 2: MONITOR KHUSUS KAS TUNAI (CASH FLOW LEDGER) ================= -->
+    <div id="tabContent-cashflow" class="tab-content hidden space-y-6">
+      
+      <!-- Top Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white p-6 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+          <span class="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xl">
+            <i class="fa-solid fa-vault"></i>
+          </span>
+          <div>
+            <h2 class="text-lg font-black tracking-tight">Buku Kas Tunai & Mutasi Saldo Berkelanjutan</h2>
+            <p class="text-xs text-slate-300">Saldo akhir setiap hari otomatis menjadi saldo awal hari berikutnya</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button onclick="openInitialBalanceModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
+            <i class="fa-solid fa-coins"></i>
+            <span>Modal Awal Kas</span>
+          </button>
+          <button onclick="printCashFlowReport()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-print"></i>
+            <span>Cetak Buku Kas</span>
+          </button>
+          <button onclick="exportCashFlowExcel()" class="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-700 text-emerald-200 border border-emerald-700 rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Ekspor Kas (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cumulative Cash KPI Banner -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-[11px] font-bold text-slate-400 uppercase block">Modal Awal Kas Toko</span>
+          <div class="text-lg font-black text-slate-800 font-mono-numeric mt-1" id="cfInitialBalance">Rp 0</div>
+          <span class="text-[10px] text-slate-400 mt-1 block">Saldo awal sistem kasir</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-[11px] font-bold text-emerald-600 uppercase block">+ Total Kas Masuk</span>
+          <div class="text-lg font-black text-emerald-600 font-mono-numeric mt-1" id="cfTotalCashIn">Rp 0</div>
+          <span class="text-[10px] text-slate-400 mt-1 block">Dari transaksi Cash</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-[11px] font-bold text-rose-600 uppercase block">- Total Biaya Tunai</span>
+          <div class="text-lg font-black text-rose-600 font-mono-numeric mt-1" id="cfTotalCashExpense">Rp 0</div>
+          <span class="text-[10px] text-slate-400 mt-1 block">Biaya operasional kas</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-[11px] font-bold text-amber-600 uppercase block">- Total Tarik Owner</span>
+          <div class="text-lg font-black text-amber-600 font-mono-numeric mt-1" id="cfTotalCashDraw">Rp 0</div>
+          <span class="text-[10px] text-slate-400 mt-1 block">Kas diambil pemilik</span>
+        </div>
+
+        <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md border border-slate-800">
+          <span class="text-[11px] font-bold text-emerald-400 uppercase block">SALDO AKHIR SAAT INI</span>
+          <div class="text-xl font-black text-white font-mono-numeric mt-1" id="cfCurrentRunningBalance">Rp 0</div>
+          <span class="text-[10px] text-slate-300 mt-1 block">Fisik kas tunai di laci</span>
+        </div>
+      </div>
+
+      <!-- Cash Flow Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm">Fluktuasi Saldo Akhir Uang Tunai Tiap Hari</h3>
+              <p class="text-xs text-slate-400">Grafik saldo kas fisik di laci saat tutup toko setiap harinya</p>
+            </div>
+            <span class="p-2 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-bold">Saldo Akhir</span>
+          </div>
+          <div class="h-64">
+            <canvas id="cashBalanceDailyLineChart"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm">Arus Masuk vs Keluar Tunai</h3>
+              <p class="text-xs text-slate-400">Perbandingan pergerakan kas</p>
+            </div>
+            <span class="p-2 rounded-lg bg-blue-50 text-blue-600 text-xs font-bold">Mutasi</span>
+          </div>
+          <div class="h-64">
+            <canvas id="cashInOutDailyBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Tabel Mutasi & Saldo Akhir Kas Tunai Harian</h3>
+            <p class="text-xs text-slate-400">Klik 'Detail' pada tanggal manapun untuk langsung membuka transaksi hari tersebut</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="text" id="cashLedgerSearch" placeholder="Cari tanggal..." class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-600 font-bold uppercase border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3.5">Tanggal</th>
+                <th class="px-4 py-3.5 text-right">Saldo Awal (Pagi)</th>
+                <th class="px-4 py-3.5 text-right text-emerald-700">+ Tunai Masuk</th>
+                <th class="px-4 py-3.5 text-right text-rose-700">- Biaya Tunai</th>
+                <th class="px-4 py-3.5 text-right text-amber-700">- Tarik Owner</th>
+                <th class="px-4 py-3.5 text-right">Perubahan Net</th>
+                <th class="px-4 py-3.5 text-right font-black text-slate-900 bg-slate-200/60">SALDO AKHIR (Sore/Malam)</th>
+                <th class="px-4 py-3.5 text-center w-20">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="cashLedgerTableBody" class="divide-y divide-slate-100 font-mono-numeric">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= TAB CONTENT 3: HITUNG FISIK KAS LACI (REKONSILIASI) ================= -->
+    <div id="tabContent-reconciliation" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Cash Denomination Inputs -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 class="font-black text-slate-900 text-base flex items-center">
+                <i class="fa-solid fa-coins text-emerald-600 mr-2"></i>
+                Kalkulator Lembaran & Koin Fisik Laci Kasir
+              </h3>
+              <p class="text-xs text-slate-400">Masukkan jumlah lembar / keping uang fisik yang ada di laci saat ini</p>
+            </div>
+            <button onclick="resetDenominationCounter()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">
+              Reset Hitungan
+            </button>
+          </div>
+
+          <!-- Denomination Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="denominationInputsContainer">
+            <!-- 100.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 100.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="100000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- 50.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 50.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="50000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- 20.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 20.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="20000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- 10.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 10.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="10000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- 5.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 5.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="5000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- 2.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 2.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="2000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- 1.000 -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Rp 1.000</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">&times;</span>
+                <input type="number" min="0" data-denom="1000" class="denom-input w-20 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="0">
+                <span class="text-xs text-slate-500">=</span>
+                <span class="denom-subtotal font-bold text-xs font-mono-numeric text-slate-900 w-24 text-right">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Koin / Pecahan Lain -->
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-slate-700 font-mono-numeric">Koin / Logam</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">Rp</span>
+                <input type="number" min="0" id="denomCoinsCustom" class="w-28 px-2 py-1 text-center font-bold text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono-numeric" placeholder="Nominal Koin">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Reconciliation Result -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-lg border border-slate-700 flex flex-col justify-between">
+          <div>
+            <h3 class="font-black text-sm uppercase tracking-wider text-emerald-400">Rekonsiliasi Kas Laci</h3>
+            <p class="text-xs text-slate-300 mt-1">Pengecekan kesesuaian fisik kas dengan sistem</p>
+
+            <div class="mt-5 space-y-3 text-xs">
+              <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                <span class="text-slate-300">Total Kas Fisik Dihitung:</span>
+                <span class="font-mono-numeric font-black text-base text-emerald-400" id="reconPhysicalCashTotal">Rp 0</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                <span class="text-slate-300">Saldo Akhir di Sistem:</span>
+                <span class="font-mono-numeric font-bold text-sm text-slate-200" id="reconSystemClosingCash">Rp 0</span>
+              </div>
+              <div class="flex justify-between items-center py-2">
+                <span class="text-slate-300">Status Selisih Kas:</span>
+                <span class="font-mono-numeric font-black text-sm" id="reconDifferenceValue">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Discrepancy Status Box -->
+            <div id="reconStatusBadgeBox" class="mt-4 p-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-center">
+              <span class="font-bold text-xs text-emerald-300" id="reconStatusText">Saldo Kas Cocok / Sempurna</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-700 text-center">
+            <p class="text-[11px] text-slate-400">Pastikan hitungan fisik dilakukan setiap pergantian shift atau tutup toko.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= TAB CONTENT 4: STATISTIK & ANALISIS ================= -->
+    <div id="tabContent-breakdown" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Pemasukan Breakdown Chart -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Metode Pembayaran Pemasukan</h3>
+              <p class="text-xs text-slate-400">Distribusi omset masuk pada periode ini</p>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="incomeMethodChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Pengeluaran Breakdown Chart -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Kategori Biaya Pengeluaran</h3>
+              <p class="text-xs text-slate-400">Rincian alokasi biaya operasional pada periode ini</p>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
+              <i class="fa-solid fa-chart-donut"></i>
+            </div>
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="expenseCategoryChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Detail Summary Box -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-4">Ringkasan Lengkap Kategori & Kanal</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="border border-emerald-100 rounded-xl p-4 bg-emerald-50/30">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-3 flex items-center">
+              <i class="fa-solid fa-circle-arrow-down mr-2 text-emerald-600"></i>
+              Rincian Metode Pemasukan
+            </h4>
+            <div class="space-y-2 text-sm" id="detailedIncomeSummary"></div>
+          </div>
+
+          <div class="border border-rose-100 rounded-xl p-4 bg-rose-50/30">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-rose-800 mb-3 flex items-center">
+              <i class="fa-solid fa-circle-arrow-up mr-2 text-rose-600"></i>
+              Rincian Kategori Pengeluaran
+            </h4>
+            <div class="space-y-2 text-sm" id="detailedExpenseSummary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB CONTENT 5: REKAP BULANAN ================= -->
+    <div id="tabContent-history" class="tab-content hidden space-y-6">
+      
+      <!-- Month Selector Bar & Action Buttons -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        <div class="flex items-center space-x-3 w-full md:w-auto">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+            <i class="fa-regular fa-calendar-check"></i>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold uppercase text-slate-400 block">Pilih Periode Bulan</span>
+            <div class="flex items-center space-x-2 mt-0.5">
+              <input type="month" id="monthlyRecapInput" class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none cursor-pointer bg-slate-50">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 w-full md:w-auto justify-end">
+          <button onclick="printMonthlyRecapReport()" class="flex items-center space-x-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+            <i class="fa-solid fa-print text-slate-300"></i>
+            <span>Cetak Rekap Bulanan</span>
+          </button>
+          <button onclick="exportMonthlyToExcel()" class="flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+            <i class="fa-solid fa-file-excel text-emerald-200"></i>
+            <span>Ekspor Excel (.xlsx)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= GRAND TOTAL PEMASUKAN & KAS BULANAN CARDS ================= -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-black text-slate-900 flex items-center">
+            <i class="fa-solid fa-chart-line text-emerald-600 mr-2"></i>
+            Grand Total Rekapitulasi Keuangan <span id="monthlyGrandTitleBadge" class="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">-</span>
+          </h3>
+          <span class="text-xs text-slate-400">Total akumulasi dari tanggal 1 s/d akhir bulan</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          
+          <!-- Box 1: Grand Total Omset Pemasukan -->
+          <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-md sm:col-span-2 lg:col-span-1">
+            <div class="flex items-center justify-between text-emerald-100">
+              <span class="text-[11px] font-black uppercase tracking-wider">GRAND TOTAL OMSET</span>
+              <i class="fa-solid fa-vault text-base"></i>
+            </div>
+            <div class="text-2xl font-black font-mono-numeric mt-1 text-white" id="mGrandTotalIncome">Rp 0</div>
+            <span class="text-[10px] text-emerald-100 mt-1 block font-medium">Akumulasi seluruh kanal pembayaran</span>
+          </div>
+
+          <!-- Box 2: Total Tunai / Cash -->
+          <div class="bg-white p-4 rounded-2xl border border-emerald-200 shadow-sm">
+            <div class="flex items-center justify-between text-emerald-600">
+              <span class="text-[11px] font-bold uppercase tracking-wider">Total Pemasukan Tunai</span>
+              <i class="fa-solid fa-money-bill-wave text-sm"></i>
+            </div>
+            <div class="text-xl font-black text-slate-900 font-mono-numeric mt-1" id="mGrandIncomeCash">Rp 0</div>
+            <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+              <span>Masuk laci kasir</span>
+              <span class="font-bold text-emerald-600 font-mono-numeric" id="mPctIncomeCash">0%</span>
+            </div>
+          </div>
+
+          <!-- Box 3: Total Transfer BCA -->
+          <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm">
+            <div class="flex items-center justify-between text-blue-600">
+              <span class="text-[11px] font-bold uppercase tracking-wider">Total Transfer BCA</span>
+              <i class="fa-solid fa-building-columns text-sm"></i>
+            </div>
+            <div class="text-xl font-black text-slate-900 font-mono-numeric mt-1" id="mGrandIncomeBCA">Rp 0</div>
+            <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+              <span>Rekening BCA</span>
+              <span class="font-bold text-blue-600 font-mono-numeric" id="mPctIncomeBCA">0%</span>
+            </div>
+          </div>
+
+          <!-- Box 4: Total QRIS -->
+          <div class="bg-white p-4 rounded-2xl border border-indigo-200 shadow-sm">
+            <div class="flex items-center justify-between text-indigo-600">
+              <span class="text-[11px] font-bold uppercase tracking-wider">Total QRIS</span>
+              <i class="fa-solid fa-qrcode text-sm"></i>
+            </div>
+            <div class="text-xl font-black text-slate-900 font-mono-numeric mt-1" id="mGrandIncomeQRIS">Rp 0</div>
+            <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+              <span>Scan barcode QRIS</span>
+              <span class="font-bold text-indigo-600 font-mono-numeric" id="mPctIncomeQRIS">0%</span>
+            </div>
+          </div>
+
+          <!-- Box 5: Total EDC -->
+          <div class="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm">
+            <div class="flex items-center justify-between text-purple-600">
+              <span class="text-[11px] font-bold uppercase tracking-wider">Total EDC</span>
+              <i class="fa-solid fa-credit-card text-sm"></i>
+            </div>
+            <div class="text-xl font-black text-slate-900 font-mono-numeric mt-1" id="mGrandIncomeEDC">Rp 0</div>
+            <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+              <span>Mesin EDC gesek</span>
+              <span class="font-bold text-purple-600 font-mono-numeric" id="mPctIncomeEDC">0%</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Secondary metrics row (Pengeluaran, Tarik Owner, Sisa Kas) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+          <div class="bg-white p-3.5 rounded-xl border border-rose-100 flex items-center justify-between text-xs">
+            <span class="text-slate-600 font-semibold flex items-center"><i class="fa-solid fa-arrow-up text-rose-500 mr-2"></i>Total Biaya Operasional:</span>
+            <span class="font-black font-mono-numeric text-rose-600 text-sm" id="mGrandTotalExpense">Rp 0</span>
+          </div>
+
+          <div class="bg-white p-3.5 rounded-xl border border-amber-100 flex items-center justify-between text-xs">
+            <span class="text-slate-600 font-semibold flex items-center"><i class="fa-solid fa-hand-holding-dollar text-amber-500 mr-2"></i>Total Tarik Owner:</span>
+            <span class="font-black font-mono-numeric text-amber-600 text-sm" id="mGrandTotalDraw">Rp 0</span>
+          </div>
+
+          <div class="bg-slate-900 text-white p-3.5 rounded-xl flex items-center justify-between text-xs shadow-sm">
+            <span class="text-slate-300 font-semibold flex items-center"><i class="fa-solid fa-coins text-emerald-400 mr-2"></i>Total Sisa Kas Fisik Laci:</span>
+            <span class="font-black font-mono-numeric text-emerald-400 text-sm" id="mGrandCashInHand">Rp 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Trend Line Chart -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-1">Tren Keuangan Harian (Bulan Ini)</h3>
+        <p class="text-xs text-slate-400 mb-4">Grafik perbandingan Pemasukan, Pengeluaran, dan Tarik Kas Owner</p>
+        <div class="h-72">
+          <canvas id="monthlyTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly Days Summary Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 font-bold text-slate-900 text-sm flex justify-between items-center">
+          <span>Rincian Rekap per Tanggal</span>
+          <span class="text-xs font-normal text-slate-400">Klik baris tanggal untuk membuka rekap harian</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-bold uppercase border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3.5">Tanggal</th>
+                <th class="px-4 py-3.5 text-right">Pemasukan Tunai</th>
+                <th class="px-4 py-3.5 text-right">Transfer BCA</th>
+                <th class="px-4 py-3.5 text-right">QRIS</th>
+                <th class="px-4 py-3.5 text-right">EDC</th>
+                <th class="px-4 py-3.5 text-right font-bold text-emerald-700">Total Omset</th>
+                <th class="px-4 py-3.5 text-right text-rose-700">Total Biaya</th>
+                <th class="px-4 py-3.5 text-right text-amber-700">Tarik Owner</th>
+                <th class="px-4 py-3.5 text-right font-bold text-slate-900">Sisa Kas Fisik</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyTableBody" class="divide-y divide-slate-100 font-mono-numeric">
+              <!-- Rendered via JS -->
+            </tbody>
+            <!-- GRAND TOTAL FOOTER -->
+            <tfoot id="monthlyTableFoot" class="bg-slate-900 text-white font-mono-numeric border-t-2 border-slate-800 font-black">
+              <!-- Rendered via JS -->
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= TAB CONTENT 6: PENGATURAN & MASTER DATA DINAMIS ================= -->
+    <div id="tabContent-settings" class="tab-content hidden space-y-6">
+      
+      <!-- Top Overview -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-2">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-black text-slate-900">Pusat Pengaturan Dinamis SNAPRINT</h2>
+            <p class="text-xs text-slate-500">Kelola profil usaha, metode pembayaran, kategori biaya, dan akun secara mandiri</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- 1. Profil Usaha -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center">
+              <i class="fa-solid fa-store text-emerald-600 mr-2"></i>
+              Profil Usaha & Identitas Struk
+            </h3>
+            <span class="text-[10px] font-bold uppercase bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">Logo Aktif</span>
+          </div>
+
+          <div class="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <img src="logo.jpg" alt="Logo SNAPRINT" class="w-14 h-14 rounded-xl object-cover shadow border border-slate-300">
+            <div>
+              <p class="text-xs font-bold text-slate-800">Logo Resmi SNAPRINT</p>
+              <p class="text-[11px] text-slate-500">Otomatis ditampilkan pada Navbar, Favicon, serta Header Cetak Laporan.</p>
+            </div>
+          </div>
+          
+          <form id="formShopProfile" onsubmit="handleShopProfileSubmit(event)" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Nama Toko / Usaha</label>
+              <input type="text" id="settingShopName" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Sub-judul / Cabang</label>
+              <input type="text" id="settingShopSub" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Alamat / Lokasi</label>
+              <input type="text" id="settingShopAddress" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Kontak / WhatsApp</label>
+              <input type="text" id="settingShopPhone" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 uppercase mb-1">Catatan Kaki Struk</label>
+              <input type="text" id="settingShopFooter" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition shadow">
+              Simpan Profil
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. Modal Awal Kas Toko & PIN Security -->
+        <div class="space-y-6">
+          <!-- Modal Awal Card -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center">
+              <i class="fa-solid fa-coins text-amber-500 mr-2"></i>
+              Modal Awal Kas Fisik
+            </h3>
+            <p class="text-xs text-slate-500">Uang modal kasir / pecahan laci sebelum pencatatan transaksi dimulai.</p>
+            
+            <div class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold uppercase text-amber-800 block">Modal Awal Saat Ini</span>
+                <span class="text-xl font-black text-slate-900 font-mono-numeric" id="settingCurrentInitialBalance">Rp 0</span>
+              </div>
+              <button onclick="openInitialBalanceModal()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                Ubah Modal
+              </button>
+            </div>
+          </div>
+
+          <!-- PIN Security Card -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center">
+              <i class="fa-solid fa-shield-halved text-emerald-600 mr-2"></i>
+              Keamanan PIN Owner (Tarik Kas)
+            </h3>
+            <p class="text-xs text-slate-500">PIN 4 angka digunakan untuk mengunci tombol & akses penarikan kas owner.</p>
+            
+            <div class="p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold uppercase text-slate-400 block">Status Proteksi PIN</span>
+                <div class="flex items-center space-x-2 mt-0.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="text-xs font-bold text-emerald-300">Aktif (PIN: 2209)</span>
+                </div>
+              </div>
+              <button onclick="changeOwnerPinModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition shadow-sm">
+                Ubah PIN
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Master Data Manager -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- 3. Dynamic Payment Methods -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center">
+              <i class="fa-solid fa-credit-card text-blue-600 mr-2"></i>
+              Master Metode Pembayaran (Pemasukan)
+            </h3>
+            <button onclick="openAddPaymentMethodModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition">
+              + Tambah Metode
+            </button>
+          </div>
+          
+          <div class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden" id="settingPaymentMethodsList">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- 4. Dynamic Expense Categories -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center">
+              <i class="fa-solid fa-tags text-rose-600 mr-2"></i>
+              Master Kategori Pengeluaran
+            </h3>
+            <button onclick="openAddExpenseCategoryModal()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition">
+              + Tambah Kategori
+            </button>
+          </div>
+
+          <div class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden" id="settingExpenseCategoriesList">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= TAB CONTENT 7: BACKUP & DATA ================= -->
+    <div id="tabContent-backup" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Backup & Restore Box -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i class="fa-solid fa-cloud-arrow-down text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Backup Cadangan Data (JSON)</h3>
+              <p class="text-xs text-slate-400">Simpan atau pulihkan file database lengkap</p>
+            </div>
+          </div>
+          
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Data tersimpan di browser Anda. Lakukan download backup berkala agar aman dari pembersihan riwayat browser.
+          </p>
+
+          <div class="pt-2 flex flex-col sm:flex-row gap-3">
+            <button onclick="backupDataJSON()" class="flex-1 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition shadow">
+              <i class="fa-solid fa-download"></i>
+              <span>Download Backup (JSON)</span>
+            </button>
+            
+            <label class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center justify-center space-x-2 cursor-pointer transition border border-slate-200">
+              <i class="fa-solid fa-upload"></i>
+              <span>Restore Backup</span>
+              <input type="file" id="restoreFileInput" accept=".json" class="hidden" onchange="restoreDataJSON(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- Excel Export & Reset -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <i class="fa-solid fa-file-excel text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Ekspor Lengkap Microsoft Excel</h3>
+              <p class="text-xs text-slate-400">Download seluruh database multi-sheet</p>
+            </div>
+          </div>
+          
+          <p class="text-xs text-slate-600 leading-relaxed">
+            File Excel berisikan lembar Buku Kas Tunai, Sheet Pemasukan, dan Sheet Pengeluaran detail untuk laporan akuntansi.
+          </p>
+
+          <div class="pt-2 flex flex-col sm:flex-row gap-3">
+            <button onclick="exportAllToExcel()" class="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition shadow">
+              <i class="fa-solid fa-file-excel"></i>
+              <span>Export Full Excel (.xlsx)</span>
+            </button>
+
+            <button onclick="resetAllDataConfirm()" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition">
+              <i class="fa-solid fa-trash-can"></i>
+              <span>Reset Data</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+      <div class="flex items-center space-x-2">
+        <img src="logo.jpg" alt="Logo" class="w-5 h-5 rounded object-cover shadow-sm">
+        <span class="font-bold text-slate-700" id="footerShopName">SNAPRINT GWISATA</span>
+        <span>&bull;</span>
+        <span>Sistem Rekapitulasi & Monitor Kas Tunai Dinamis</span>
+      </div>
+      <div class="flex items-center space-x-1">
+        <span>Status Kas:</span>
+        <span class="inline-flex items-center text-emerald-600 font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+          Aktif & Berkelanjutan
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL: INPUT PEMASUKAN ================= -->
+  <div id="modalIncome" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl modal-content border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i class="fa-solid fa-circle-plus"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800" id="modalIncomeTitle">Catat Pemasukan</h3>
+        </div>
+        <button onclick="closeModal('income')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formIncome" onsubmit="handleIncomeSubmit(event)" class="mt-4 space-y-4">
+        <input type="hidden" id="incomeEditId">
+
+        <!-- Metode Pembayaran Dinamis -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Metode Pembayaran <span class="text-rose-500">*</span></label>
+          <div class="grid grid-cols-2 gap-2" id="incomePaymentMethodsContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Nominal & Quick Chips -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal (Rp) <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">Rp</span>
+            <input type="text" id="incomeAmount" required placeholder="0" class="w-full pl-11 pr-4 py-2 text-lg font-bold text-slate-900 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono-numeric">
+          </div>
+          
+          <!-- Quick Amount Chips -->
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <button type="button" onclick="addAmountToInput('incomeAmount', 5000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+5k</button>
+            <button type="button" onclick="addAmountToInput('incomeAmount', 10000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+10k</button>
+            <button type="button" onclick="addAmountToInput('incomeAmount', 20000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+20k</button>
+            <button type="button" onclick="addAmountToInput('incomeAmount', 50000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+50k</button>
+            <button type="button" onclick="addAmountToInput('incomeAmount', 100000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+100k</button>
+            <button type="button" onclick="addAmountToInput('incomeAmount', 500000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+500k</button>
+          </div>
+        </div>
+
+        <!-- Keterangan -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Keterangan / Item / Pelanggan</label>
+          <input type="text" id="incomeDescription" placeholder="Contoh: Cetak Foto 4R (5 lbr), Print Banner" class="w-full px-3.5 py-2 text-xs text-slate-800 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <!-- Waktu & Tanggal -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal</label>
+            <input type="date" id="incomeDate" required class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jam</label>
+            <input type="time" id="incomeTime" class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="pt-3 flex space-x-2">
+          <button type="button" onclick="closeModal('income')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20">Simpan Pemasukan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: INPUT PENGELUARAN ================= -->
+  <div id="modalExpense" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl modal-content border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
+            <i class="fa-solid fa-circle-minus"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800" id="modalExpenseTitle">Catat Pengeluaran</h3>
+        </div>
+        <button onclick="closeModal('expense')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formExpense" onsubmit="handleExpenseSubmit(event)" class="mt-4 space-y-4">
+        <input type="hidden" id="expenseEditId">
+
+        <!-- Kategori Pengeluaran Dinamis -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Biaya <span class="text-rose-500">*</span></label>
+          <select id="expenseCategory" required class="w-full px-3.5 py-2 text-xs font-semibold text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <!-- Rendered dynamically -->
+          </select>
+        </div>
+
+        <!-- Sumber Dana Pembayaran Dinamis -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sumber Dana</label>
+          <div class="grid grid-cols-2 gap-2" id="expenseSourcesContainer">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Nominal & Quick Chips -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal (Rp) <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">Rp</span>
+            <input type="text" id="expenseAmount" required placeholder="0" class="w-full pl-11 pr-4 py-2 text-lg font-bold text-slate-900 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono-numeric">
+          </div>
+
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <button type="button" onclick="addAmountToInput('expenseAmount', 5000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+5k</button>
+            <button type="button" onclick="addAmountToInput('expenseAmount', 10000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+10k</button>
+            <button type="button" onclick="addAmountToInput('expenseAmount', 20000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+20k</button>
+            <button type="button" onclick="addAmountToInput('expenseAmount', 50000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+50k</button>
+            <button type="button" onclick="addAmountToInput('expenseAmount', 100000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+100k</button>
+          </div>
+        </div>
+
+        <!-- Keterangan -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Keterangan / Rincian Biaya</label>
+          <input type="text" id="expenseDescription" placeholder="Contoh: Beli Kertas Glossy 2 Rim, Bensin motor" class="w-full px-3.5 py-2 text-xs text-slate-800 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500">
+        </div>
+
+        <!-- Waktu & Tanggal -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal</label>
+            <input type="date" id="expenseDate" required class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jam</label>
+            <input type="time" id="expenseTime" class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500">
+          </div>
+        </div>
+
+        <div class="pt-3 flex space-x-2">
+          <button type="button" onclick="closeModal('expense')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/20">Simpan Pengeluaran</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PENARIKAN UANG TUNAI OWNER ================= -->
+  <div id="modalDraw" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl modal-content border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800" id="modalDrawTitle">Penarikan Kas Oleh Owner</h3>
+        </div>
+        <button onclick="closeModal('draw')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="my-3 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-start space-x-2">
+        <i class="fa-solid fa-circle-info mt-0.5 text-amber-600"></i>
+        <span>Penarikan ini akan <strong>mengurangi saldo kas tunai fisik di laci</strong> secara langsung.</span>
+      </div>
+
+      <form id="formDraw" onsubmit="handleDrawSubmit(event)" class="mt-2 space-y-4">
+        <input type="hidden" id="drawEditId">
+
+        <!-- Nominal -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal Penarikan (Rp) <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">Rp</span>
+            <input type="text" id="drawAmount" required placeholder="0" class="w-full pl-11 pr-4 py-2 text-lg font-bold text-slate-900 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono-numeric">
+          </div>
+          
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <button type="button" onclick="addAmountToInput('drawAmount', 50000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+50k</button>
+            <button type="button" onclick="addAmountToInput('drawAmount', 100000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+100k</button>
+            <button type="button" onclick="addAmountToInput('drawAmount', 500000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+500k</button>
+            <button type="button" onclick="addAmountToInput('drawAmount', 1000000)" class="quick-chip px-2 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">+1jt</button>
+          </div>
+        </div>
+
+        <!-- Nama Penerima / Catatan -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Catatan / Penerima</label>
+          <input type="text" id="drawDescription" placeholder="Contoh: Diambil Pak Owner / Setor Bank" class="w-full px-3.5 py-2 text-xs text-slate-800 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <!-- Waktu & Tanggal -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal</label>
+            <input type="date" id="drawDate" required class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jam</label>
+            <input type="time" id="drawTime" class="w-full px-3 py-1.5 text-xs text-slate-800 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <div class="pt-3 flex space-x-2">
+          <button type="button" onclick="closeModal('draw')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-600/20">Simpan Penarikan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SETTING MODAL AWAL KAS ================= -->
+  <div id="modalInitialBalance" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl modal-content border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i class="fa-solid fa-vault"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800">Modal Awal Kas Toko</h3>
+        </div>
+        <button onclick="closeModal('initialBalance')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formInitialBalance" onsubmit="handleInitialBalanceSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal Modal Awal Kas Tunai (Rp)</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">Rp</span>
+            <input type="text" id="initialBalanceAmount" required placeholder="0" class="w-full pl-11 pr-4 py-2 text-lg font-bold text-slate-900 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono-numeric">
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1.5">Uang kas awal / pecahan di laci toko sebelum ada transaksi.</p>
+        </div>
+
+        <div class="pt-3 flex space-x-2">
+          <button type="button" onclick="closeModal('initialBalance')" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Batal</button>
+          <button type="submit" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20">Simpan Modal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: DIALOG PILIHAN CETAK ================= -->
+  <div id="modalPrintSelect" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm modal-backdrop">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl modal-content border border-slate-100 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+        <i class="fa-solid fa-print"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Pilih Format Cetak</h3>
+      <p class="text-xs text-slate-500 mt-1">Pilih tata letak pencetakan laporan rekapitulasi</p>
+
+      <div class="mt-5 space-y-2.5">
+        <button onclick="printFormalA4Report()" class="w-full p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center justify-between transition shadow">
+          <span class="flex items-center"><i class="fa-regular fa-file-lines text-base mr-2 text-emerald-400"></i>Berita Acara A4 (Lengkap)</span>
+          <i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>
+        </button>
+
+        <button onclick="printThermalReceipt()" class="w-full p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-between transition shadow">
+          <span class="flex items-center"><i class="fa-solid fa-receipt text-base mr-2"></i>Struk Kasir Thermal (58mm/80mm)</span>
+          <i class="fa-solid fa-arrow-right text-xs text-emerald-200"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100">
+        <button onclick="closeModal('printSelect')" class="text-xs text-slate-500 hover:text-slate-800 font-semibold">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PRINT AREA: FORMAT A4 (LENGKAP RESMI) ================= -->
+  <div id="printAreaA4" class="print-only print-a4-container">
+    <div class="border-b-2 border-black pb-3 flex items-center justify-between">
+      <img src="logo.jpg" alt="Logo" class="w-16 h-16 object-contain rounded-xl border border-black p-0.5">
+      <div class="flex-1 text-center px-4">
+        <h1 class="text-xl font-black uppercase tracking-wider" id="printA4ShopName">SNAPRINT GWISATA</h1>
+        <p class="text-xs" id="printA4ShopAddress">Sistem Rekapitulasi & Monitor Kas Tunai</p>
+        <h2 class="text-sm font-bold uppercase mt-1 underline" id="printA4ReportTitle">BERITA ACARA REKAPITULASI KAS & KEUANGAN</h2>
+        <div class="text-xs font-bold mt-0.5" id="printA4DateHeader">Periode: -</div>
+      </div>
+      <div class="w-16"></div>
+    </div>
+
+    <!-- Ringkasan Mutasi -->
+    <div class="my-4 border border-black p-3 text-xs">
+      <h3 class="font-bold border-b border-black pb-1 mb-2 uppercase">1. Ringkasan Kas & Arus Dana</h3>
+      <table class="w-full text-xs">
+        <tbody>
+          <tr>
+            <td class="py-1 font-semibold">Saldo Awal Kas Tunai (Pagi):</td>
+            <td class="py-1 text-right font-bold" id="printA4OpeningCash">Rp 0</td>
+          </tr>
+          <tr>
+            <td class="py-1 font-semibold">Total Pemasukan (Omset):</td>
+            <td class="py-1 text-right font-bold" id="printA4TotalIncome">Rp 0</td>
+          </tr>
+          <tr id="printA4IncomeBreakdownRow">
+            <td colspan="2" class="pl-4 text-[11px] space-y-1" id="printA4IncomeDetails">
+              <!-- Dynamically populated -->
+            </td>
+          </tr>
+          <tr class="border-t border-dashed border-black">
+            <td class="py-1 font-semibold">Total Pengeluaran:</td>
+            <td class="py-1 text-right font-bold" id="printA4TotalExpense">Rp 0</td>
+          </tr>
+          <tr id="printA4ExpenseBreakdownRow">
+            <td colspan="2" class="pl-4 text-[11px] space-y-1" id="printA4ExpenseDetails">
+              <!-- Dynamically populated -->
+            </td>
+          </tr>
+          <tr class="border-t border-dashed border-black">
+            <td class="py-1 font-semibold">Penarikan Tunai Oleh Owner:</td>
+            <td class="py-1 text-right font-bold" id="printA4TotalDraw">Rp 0</td>
+          </tr>
+          <tr class="border-t-2 border-black font-black text-sm bg-slate-100">
+            <td class="py-1.5">SALDO AKHIR KAS TUNAI FISIK (LACI):</td>
+            <td class="py-1.5 text-right font-mono" id="printA4ClosingCash">Rp 0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Rincian Transaksi -->
+    <div class="my-4">
+      <h3 class="font-bold text-xs uppercase mb-2">2. Rincian Seluruh Transaksi</h3>
+      <table class="w-full text-[10px] border border-black border-collapse">
+        <thead>
+          <tr class="bg-slate-200 border-b border-black">
+            <th class="border border-black px-2 py-1 text-left">Waktu</th>
+            <th class="border border-black px-2 py-1 text-left">Tipe</th>
+            <th class="border border-black px-2 py-1 text-left">Kategori / Metode</th>
+            <th class="border border-black px-2 py-1 text-left">Keterangan</th>
+            <th class="border border-black px-2 py-1 text-right">Nominal</th>
+          </tr>
+        </thead>
+        <tbody id="printA4TableBody">
+          <!-- Loaded dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tanda Tangan -->
+    <div class="mt-8 pt-4 grid grid-cols-2 text-center text-xs">
+      <div>
+        <p>Kasir / Admin Bertugas,</p>
+        <div class="h-16"></div>
+        <p class="font-bold underline">( ........................................ )</p>
+      </div>
+      <div>
+        <p id="printA4SignOwnerLabel">Owner SNAPRINT GWISATA,</p>
+        <div class="h-16"></div>
+        <p class="font-bold underline">( ........................................ )</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PRINT AREA: STRUK THERMAL POS (58mm/80mm) ================= -->
+  <div id="printAreaThermal" class="print-only print-thermal-container">
+    <div class="text-center pb-2 border-b border-dashed border-black">
+      <img src="logo.jpg" alt="Logo" class="w-10 h-10 object-contain mx-auto mb-1 rounded-full border border-black grayscale">
+      <h1 class="text-sm font-black uppercase" id="printThermalShopName">SNAPRINT GWISATA</h1>
+      <p class="text-[9px]" id="printThermalShopSub">Rekapitulasi Kas Harian</p>
+      <p class="text-[9px]" id="printThermalShopAddress">-</p>
+      <p class="text-[9px]" id="printThermalDate">Tanggal: -</p>
+    </div>
+
+    <div class="py-2 border-b border-dashed border-black text-[9px] space-y-1">
+      <div class="flex justify-between">
+        <span>SALDO AWAL:</span>
+        <span class="font-bold" id="printThermalOpening">Rp 0</span>
+      </div>
+      <div class="flex justify-between">
+        <span>TOTAL OMSET:</span>
+        <span class="font-bold" id="printThermalIncome">Rp 0</span>
+      </div>
+      <div class="flex justify-between">
+        <span>TOTAL BIAYA:</span>
+        <span class="font-bold" id="printThermalExpense">Rp 0</span>
+      </div>
+      <div class="flex justify-between">
+        <span>TARIK OWNER:</span>
+        <span class="font-bold" id="printThermalDraw">Rp 0</span>
+      </div>
+    </div>
+
+    <div class="py-2 border-b border-black text-[10px] flex justify-between font-bold">
+      <span>SALDO AKHIR LACI:</span>
+      <span id="printThermalClosing">Rp 0</span>
+    </div>
+
+    <div class="py-2 text-[8px] text-center" id="printThermalFooter">
+      Terima Kasih - SNAPRINT GWISATA
+    </div>
+  </div>
+
+  <!-- Core App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
