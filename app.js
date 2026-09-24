@@ -6,17 +6,17 @@
  */
 
 // ================= CONSTANTS & DEFAULT CONFIG =================
-const STORAGE_KEY = 'snaprint_gwisata_prod_db_v3';
-const LEGACY_STORAGE_KEY = 'snaprint_gwisata_prod_db_v1';
+var STORAGE_KEY = 'snaprint_gwisata_prod_db_v4';
+var LEGACY_STORAGE_KEY = 'snaprint_gwisata_prod_db_v1';
 
-const DEFAULT_PAYMENT_METHODS = [
+var DEFAULT_PAYMENT_METHODS = [
   { id: 'pm_cash', name: 'TUNAI/CASH', label: 'TUNAI / CASH', isCash: true, color: 'emerald', icon: 'fa-money-bill-wave', note: 'Masuk laci kasir' },
   { id: 'pm_bca', name: 'TRANSFER BCA', label: 'TRANSFER BCA', isCash: false, color: 'blue', icon: 'fa-building-columns', note: 'Rekening BCA' },
   { id: 'pm_qris', name: 'QRIS', label: 'QRIS', isCash: false, color: 'indigo', icon: 'fa-qrcode', note: 'Scan barcode QRIS' },
   { id: 'pm_edc', name: 'EDC', label: 'EDC', isCash: false, color: 'purple', icon: 'fa-credit-card', note: 'Mesin gesek EDC' }
 ];
 
-const DEFAULT_EXPENSE_CATEGORIES = [
+var DEFAULT_EXPENSE_CATEGORIES = [
   { id: 'cat_trans', name: 'Transport', icon: 'fa-car' },
   { id: 'cat_equip', name: 'Pembelian Peralatan', icon: 'fa-print' },
   { id: 'cat_food', name: 'Minuman/makanan', icon: 'fa-utensils' },
@@ -25,12 +25,12 @@ const DEFAULT_EXPENSE_CATEGORIES = [
   { id: 'cat_other', name: 'Operasional lain', icon: 'fa-gears' }
 ];
 
-const DEFAULT_EXPENSE_SOURCES = [
+var DEFAULT_EXPENSE_SOURCES = [
   { id: 'src_cash', name: 'TUNAI/CASH', label: 'Kas Tunai Laci', isCash: true, note: 'Mengurangi kas fisik' },
   { id: 'src_bca', name: 'TRANSFER BCA', label: 'Transfer BCA', isCash: false, note: 'Dari rekening bank' }
 ];
 
-const DEFAULT_SHOP_PROFILE = {
+var DEFAULT_SHOP_PROFILE = {
   name: 'SNAPRINT GRAND WISATA',
   badge: 'GWISATA',
   sub: 'Rekapitulasi Keuangan & Monitor Kas Tunai',
@@ -39,7 +39,7 @@ const DEFAULT_SHOP_PROFILE = {
   footer: 'Terima Kasih atas Kunjungan Anda - SNAPRINT GWISATA'
 };
 
-const DEFAULT_OWNER_PIN = '2209';
+var DEFAULT_OWNER_PIN = '2209';
 
 
 const INITIAL_DEMO_DATA = {
@@ -125,7 +125,7 @@ const INITIAL_DEMO_DATA = {
   ]
 };
 
-const DEFAULT_MASTER_DATA = {
+var DEFAULT_MASTER_DATA = {
   "initialCashBalance": 500000,
   "ownerPin": "2209",
   "shopProfile": {
@@ -333,7 +333,7 @@ const DEFAULT_MASTER_DATA = {
     }
   ]
 };
-const EMPTY_DATA = {
+var EMPTY_DATA = {
   initialCashBalance: 0,
   ownerPin: DEFAULT_OWNER_PIN,
   shopProfile: DEFAULT_SHOP_PROFILE,
