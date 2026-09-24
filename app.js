@@ -6,7 +6,7 @@
  */
 
 // ================= CONSTANTS & DEFAULT CONFIG =================
-const STORAGE_KEY = 'snaprint_gwisata_prod_db_v2';
+const STORAGE_KEY = 'snaprint_gwisata_prod_db_v3';
 const LEGACY_STORAGE_KEY = 'snaprint_gwisata_prod_db_v1';
 
 const DEFAULT_PAYMENT_METHODS = [
@@ -125,6 +125,214 @@ const INITIAL_DEMO_DATA = {
   ]
 };
 
+const DEFAULT_MASTER_DATA = {
+  "initialCashBalance": 500000,
+  "ownerPin": "2209",
+  "shopProfile": {
+    "name": "SNAPRINT GRAND WISATA",
+    "badge": "GWISATA",
+    "sub": "Rekapitulasi Keuangan & Monitor Kas Tunai",
+    "address": "Jl Kalijambe - Lambangsari. Tambun Selatan Bekasi",
+    "phone": "081311933172",
+    "footer": "Terima Kasih atas Kunjungan Anda - SNAPRINT GWISATA"
+  },
+  "paymentMethods": [
+    {
+      "id": "pm_cash",
+      "name": "TUNAI/CASH",
+      "label": "TUNAI / CASH",
+      "isCash": true,
+      "color": "emerald",
+      "icon": "fa-money-bill-wave",
+      "note": "Masuk laci kasir"
+    },
+    {
+      "id": "pm_bca",
+      "name": "TRANSFER BCA",
+      "label": "TRANSFER BCA",
+      "isCash": false,
+      "color": "blue",
+      "icon": "fa-building-columns",
+      "note": "Rekening BCA"
+    },
+    {
+      "id": "pm_qris",
+      "name": "QRIS",
+      "label": "QRIS",
+      "isCash": false,
+      "color": "indigo",
+      "icon": "fa-qrcode",
+      "note": "Scan barcode QRIS"
+    },
+    {
+      "id": "pm_edc",
+      "name": "EDC",
+      "label": "EDC",
+      "isCash": false,
+      "color": "purple",
+      "icon": "fa-credit-card",
+      "note": "Mesin gesek EDC"
+    }
+  ],
+  "expenseCategories": [
+    {
+      "id": "cat_trans",
+      "name": "Transport",
+      "icon": "fa-car"
+    },
+    {
+      "id": "cat_equip",
+      "name": "Pembelian Peralatan",
+      "icon": "fa-print"
+    },
+    {
+      "id": "cat_food",
+      "name": "Minuman/makanan",
+      "icon": "fa-utensils"
+    },
+    {
+      "id": "cat_trash",
+      "name": "Sampah",
+      "icon": "fa-trash"
+    },
+    {
+      "id": "cat_don",
+      "name": "Donasi",
+      "icon": "fa-hand-holding-heart"
+    },
+    {
+      "id": "cat_other",
+      "name": "Operasional lain",
+      "icon": "fa-gears"
+    }
+  ],
+  "expenseSources": [
+    {
+      "id": "src_cash",
+      "name": "TUNAI/CASH",
+      "label": "Kas Tunai Laci",
+      "isCash": true,
+      "note": "Mengurangi kas fisik"
+    },
+    {
+      "id": "src_bca",
+      "name": "TRANSFER BCA",
+      "label": "Transfer BCA",
+      "isCash": false,
+      "note": "Dari rekening bank"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "tx-20260924-01",
+      "type": "income",
+      "category": "TUNAI/CASH",
+      "source": "TUNAI/CASH",
+      "amount": 768000,
+      "description": "Penjualan Cetak & Print Kasir (Tunai)",
+      "date": "2026-09-24",
+      "time": "09:30",
+      "receiptNo": "RCP-2401",
+      "createdAt": "2026-09-24T02:30:00.000Z"
+    },
+    {
+      "id": "tx-20260924-02",
+      "type": "income",
+      "category": "QRIS",
+      "source": "QRIS",
+      "amount": 185000,
+      "description": "Print Warna & Jilid Skripsi",
+      "date": "2026-09-24",
+      "time": "10:15",
+      "receiptNo": "RCP-2402",
+      "createdAt": "2026-09-24T03:15:00.000Z"
+    },
+    {
+      "id": "tx-20260924-03",
+      "type": "income",
+      "category": "TRANSFER BCA",
+      "source": "TRANSFER BCA",
+      "amount": 450000,
+      "description": "Cetak Spanduk Banner Flexi 4x2m",
+      "date": "2026-09-24",
+      "time": "11:20",
+      "receiptNo": "RCP-2403",
+      "createdAt": "2026-09-24T04:20:00.000Z"
+    },
+    {
+      "id": "tx-20260924-04",
+      "type": "expense",
+      "category": "Pembelian Peralatan",
+      "source": "TUNAI/CASH",
+      "amount": 200000,
+      "description": "Perbaikan alat & service mesin print",
+      "date": "2026-09-24",
+      "time": "11:50",
+      "receiptNo": "EXP-2401",
+      "createdAt": "2026-09-24T04:50:00.000Z"
+    },
+    {
+      "id": "tx-20260924-05",
+      "type": "expense",
+      "category": "Minuman/makanan",
+      "source": "TUNAI/CASH",
+      "amount": 35000,
+      "description": "Konsumsi & Air Galon Toko",
+      "date": "2026-09-24",
+      "time": "12:30",
+      "receiptNo": "EXP-2402",
+      "createdAt": "2026-09-24T05:30:00.000Z"
+    },
+    {
+      "id": "tx-20260924-06",
+      "type": "draw",
+      "category": "Tarik Kas",
+      "source": "TUNAI/CASH",
+      "amount": 300000,
+      "description": "Penarikan Tunai Kas Toko oleh Owner",
+      "date": "2026-09-24",
+      "time": "13:15",
+      "receiptNo": "DRW-2401",
+      "createdAt": "2026-09-24T06:15:00.000Z"
+    },
+    {
+      "id": "tx-20260923-01",
+      "type": "income",
+      "category": "TUNAI/CASH",
+      "source": "TUNAI/CASH",
+      "amount": 620000,
+      "description": "Penjualan Cetak Foto & Dokumen",
+      "date": "2026-09-23",
+      "time": "10:00",
+      "receiptNo": "RCP-2301",
+      "createdAt": "2026-09-23T03:00:00.000Z"
+    },
+    {
+      "id": "tx-20260923-02",
+      "type": "income",
+      "category": "TRANSFER BCA",
+      "source": "TRANSFER BCA",
+      "amount": 350000,
+      "description": "Cetak Kartu Nama 5 Box",
+      "date": "2026-09-23",
+      "time": "14:00",
+      "receiptNo": "RCP-2302",
+      "createdAt": "2026-09-23T07:00:00.000Z"
+    },
+    {
+      "id": "tx-20260923-03",
+      "type": "expense",
+      "category": "Operasional lain",
+      "source": "TUNAI/CASH",
+      "amount": 50000,
+      "description": "Beli ATK dan lakban packing",
+      "date": "2026-09-23",
+      "time": "15:30",
+      "receiptNo": "EXP-2301",
+      "createdAt": "2026-09-23T08:30:00.000Z"
+    }
+  ]
+};
 const EMPTY_DATA = {
   initialCashBalance: 0,
   ownerPin: DEFAULT_OWNER_PIN,
@@ -136,7 +344,7 @@ const EMPTY_DATA = {
 };
 
 // ================= GLOBAL APPLICATION STATE =================
-let appData = JSON.parse(JSON.stringify(INITIAL_DEMO_DATA));
+let appData = JSON.parse(JSON.stringify(DEFAULT_MASTER_DATA));
 
 let periodMode = 'day'; // 'day' | 'range'
 let activeDate = getTodayStr();
@@ -234,7 +442,7 @@ function loadData() {
         paymentMethods: Array.isArray(parsed.paymentMethods) && parsed.paymentMethods.length > 0 ? parsed.paymentMethods : DEFAULT_PAYMENT_METHODS,
         expenseCategories: Array.isArray(parsed.expenseCategories) && parsed.expenseCategories.length > 0 ? parsed.expenseCategories : DEFAULT_EXPENSE_CATEGORIES,
         expenseSources: Array.isArray(parsed.expenseSources) && parsed.expenseSources.length > 0 ? parsed.expenseSources : DEFAULT_EXPENSE_SOURCES,
-        transactions: Array.isArray(parsed.transactions) ? parsed.transactions : []
+        transactions: Array.isArray(parsed.transactions) && parsed.transactions.length > 0 ? parsed.transactions : DEFAULT_MASTER_DATA.transactions
       };
     } else {
       appData = JSON.parse(JSON.stringify(EMPTY_DATA));
