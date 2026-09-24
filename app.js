@@ -31,11 +31,11 @@ const DEFAULT_EXPENSE_SOURCES = [
 ];
 
 const DEFAULT_SHOP_PROFILE = {
-  name: 'SNAPRINT',
+  name: 'SNAPRINT GRAND WISATA',
   badge: 'GWISATA',
   sub: 'Rekapitulasi Keuangan & Monitor Kas Tunai',
-  address: 'Kawasan Wisata Bahari / Outlet SNAPRINT GWISATA',
-  phone: '0812-XXXX-XXXX',
+  address: 'Jl Kalijambe - Lambangsari. Tambun Selatan Bekasi',
+  phone: '081311933172',
   footer: 'Terima Kasih atas Kunjungan Anda - SNAPRINT GWISATA'
 };
 
