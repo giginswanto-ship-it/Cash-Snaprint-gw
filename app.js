@@ -6,7 +6,7 @@
  */
 
 // ================= CONSTANTS & DEFAULT CONFIG =================
-var STORAGE_KEY = 'snaprint_gwisata_prod_db_v4';
+var STORAGE_KEY = 'snaprint_gwisata_prod_db_v5';
 var LEGACY_STORAGE_KEY = 'snaprint_gwisata_prod_db_v1';
 
 var DEFAULT_PAYMENT_METHODS = [
@@ -424,17 +424,15 @@ function escapeHtml(text) {
 function loadData() {
   try {
     let raw = localStorage.getItem(STORAGE_KEY);
-    
-    // Migration from v1 if v2 not exists
     if (!raw) {
-      const v1Raw = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (v1Raw) {
-        raw = v1Raw;
-      }
+      // Auto seed with DEFAULT_MASTER_DATA
+      appData = JSON.parse(JSON.stringify(DEFAULT_MASTER_DATA));
+      saveData();
+      return;
     }
 
-    if (raw) {
-      const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.transactions) && parsed.transactions.length > 0) {
       appData = {
         initialCashBalance: Number(parsed.initialCashBalance) || 0,
         ownerPin: parsed.ownerPin || DEFAULT_OWNER_PIN,
@@ -442,15 +440,16 @@ function loadData() {
         paymentMethods: Array.isArray(parsed.paymentMethods) && parsed.paymentMethods.length > 0 ? parsed.paymentMethods : DEFAULT_PAYMENT_METHODS,
         expenseCategories: Array.isArray(parsed.expenseCategories) && parsed.expenseCategories.length > 0 ? parsed.expenseCategories : DEFAULT_EXPENSE_CATEGORIES,
         expenseSources: Array.isArray(parsed.expenseSources) && parsed.expenseSources.length > 0 ? parsed.expenseSources : DEFAULT_EXPENSE_SOURCES,
-        transactions: Array.isArray(parsed.transactions) && parsed.transactions.length > 0 ? parsed.transactions : DEFAULT_MASTER_DATA.transactions
+        transactions: parsed.transactions
       };
     } else {
-      appData = JSON.parse(JSON.stringify(EMPTY_DATA));
+      appData = JSON.parse(JSON.stringify(DEFAULT_MASTER_DATA));
       saveData();
     }
   } catch (err) {
     console.error('Error loading data:', err);
-    appData = JSON.parse(JSON.stringify(EMPTY_DATA));
+    appData = JSON.parse(JSON.stringify(DEFAULT_MASTER_DATA));
+    saveData();
   }
 }
 
