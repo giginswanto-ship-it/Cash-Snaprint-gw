@@ -41,6 +41,90 @@ const DEFAULT_SHOP_PROFILE = {
 
 const DEFAULT_OWNER_PIN = '2209';
 
+
+const INITIAL_DEMO_DATA = {
+  initialCashBalance: 250000,
+  ownerPin: '2209',
+  shopProfile: DEFAULT_SHOP_PROFILE,
+  paymentMethods: DEFAULT_PAYMENT_METHODS,
+  expenseCategories: DEFAULT_EXPENSE_CATEGORIES,
+  expenseSources: DEFAULT_EXPENSE_SOURCES,
+  transactions: [
+    {
+      id: 'tx-init-1',
+      type: 'income',
+      category: 'TUNAI/CASH',
+      source: 'TUNAI/CASH',
+      amount: 150000,
+      description: 'Cetak Spanduk Banner Wisata 3x1m (Tunai)',
+      date: getTodayStr(),
+      time: '09:15',
+      receiptNo: 'RCP-001',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'tx-init-2',
+      type: 'income',
+      category: 'QRIS',
+      source: 'QRIS',
+      amount: 45000,
+      description: 'Print Foto & Dokumen Warna Laminating',
+      date: getTodayStr(),
+      time: '10:30',
+      receiptNo: 'RCP-002',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'tx-init-3',
+      type: 'income',
+      category: 'TRANSFER BCA',
+      source: 'TRANSFER BCA',
+      amount: 450000,
+      description: 'Cetak Brosur & Kalender Promosi Wisata',
+      date: getTodayStr(),
+      time: '11:00',
+      receiptNo: 'RCP-003',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'tx-init-4',
+      type: 'expense',
+      category: 'Pembelian Peralatan',
+      source: 'TUNAI/CASH',
+      amount: 65000,
+      description: 'Beli Kertas Glossy & Tinta refill',
+      date: getTodayStr(),
+      time: '11:45',
+      receiptNo: 'EXP-001',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'tx-init-5',
+      type: 'expense',
+      category: 'Minuman/makanan',
+      source: 'TUNAI/CASH',
+      amount: 25000,
+      description: 'Air mineral galon & konsumsi jaga toko',
+      date: getTodayStr(),
+      time: '12:20',
+      receiptNo: 'EXP-002',
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'tx-init-6',
+      type: 'draw',
+      category: 'Tarik Kas',
+      source: 'TUNAI/CASH',
+      amount: 100000,
+      description: 'Penarikan Kas Tunai oleh Owner',
+      date: getTodayStr(),
+      time: '13:00',
+      receiptNo: 'DRW-001',
+      createdAt: new Date().toISOString()
+    }
+  ]
+};
+
 const EMPTY_DATA = {
   initialCashBalance: 0,
   ownerPin: DEFAULT_OWNER_PIN,
@@ -52,7 +136,7 @@ const EMPTY_DATA = {
 };
 
 // ================= GLOBAL APPLICATION STATE =================
-let appData = JSON.parse(JSON.stringify(EMPTY_DATA));
+let appData = JSON.parse(JSON.stringify(INITIAL_DEMO_DATA));
 
 let periodMode = 'day'; // 'day' | 'range'
 let activeDate = getTodayStr();
